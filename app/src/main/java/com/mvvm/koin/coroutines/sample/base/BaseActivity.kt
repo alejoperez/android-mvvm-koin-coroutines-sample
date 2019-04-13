@@ -8,40 +8,27 @@ import androidx.annotation.IdRes
 import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.ViewModelProviders
 import com.mvvm.koin.coroutines.sample.R
-import dagger.android.AndroidInjection
 import kotlinx.android.synthetic.main.toolbar.*
 import org.jetbrains.anko.alert
 import org.jetbrains.anko.yesButton
-import javax.inject.Inject
 
-abstract class BaseActivity<VM: BaseViewModel,DB: ViewDataBinding> : AppCompatActivity(), IBaseView {
-
-    @Inject
-    lateinit var viewModelFactory: ViewModelProvider.Factory
-
-    @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
-    lateinit var viewModel: VM
+abstract class BaseActivity<DB: ViewDataBinding> : AppCompatActivity(), IBaseView {
 
     @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
     lateinit var dataBinding: DB
 
     abstract fun getLayoutId(): Int
-    abstract fun getViewModelClass(): Class<VM>
     abstract fun getVariablesToBind(): Map<Int,Any>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(getLayoutId())
-        AndroidInjection.inject(this)
         initViewModel()
         initView()
     }
 
     open fun initViewModel() {
-        viewModel = obtainViewModel(getViewModelClass())
     }
 
     open fun initView() {
@@ -82,8 +69,6 @@ abstract class BaseActivity<VM: BaseViewModel,DB: ViewDataBinding> : AppCompatAc
 
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     fun getCurrentFragment(@IdRes fragmentId: Int): Fragment? = supportFragmentManager.findFragmentById(fragmentId)
-
-    override fun <T : BaseViewModel> obtainViewModel(clazz: Class<T>): T = ViewModelProviders.of(this,viewModelFactory).get(clazz)
 
     override fun onNetworkError() = showAlert(R.string.error_network)
 }

@@ -6,9 +6,7 @@ import kotlinx.coroutines.Deferred
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
-import javax.inject.Singleton
 
-@Singleton
 interface IApi {
 
     @POST("user/login")

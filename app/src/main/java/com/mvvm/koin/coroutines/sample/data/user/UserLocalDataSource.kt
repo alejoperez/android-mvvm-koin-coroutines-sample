@@ -1,5 +1,6 @@
 package com.mvvm.koin.coroutines.sample.data.user
 
+import com.mvvm.koin.coroutines.sample.coroutines.ICoroutineContextProvider
 import com.mvvm.koin.coroutines.sample.data.room.User
 import com.mvvm.koin.coroutines.sample.data.preference.PreferenceManager
 import com.mvvm.koin.coroutines.sample.data.room.UserDao
@@ -8,15 +9,12 @@ import com.mvvm.koin.coroutines.sample.webservice.LoginResponse
 import com.mvvm.koin.coroutines.sample.webservice.RegisterRequest
 import com.mvvm.koin.coroutines.sample.webservice.RegisterResponse
 import kotlinx.coroutines.*
-import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
-class UserLocalDataSource @Inject constructor(private val userDao: UserDao, private val preferenceManager: PreferenceManager): IUserDataSource {
+class UserLocalDataSource(private val userDao: UserDao, private val preferenceManager: PreferenceManager, private val provider: ICoroutineContextProvider): IUserDataSource {
 
-    override suspend fun getUserAsync(): Deferred<User> = CoroutineScope(Dispatchers.IO).async { userDao.getUser() }
+    override suspend fun getUserAsync(): Deferred<User> = CoroutineScope(provider.getIoContext()).async { userDao.getUser() }
 
-    override suspend fun saveUserAsync(user: User) = withContext(Dispatchers.IO) { userDao.saveUser(user) }
+    override suspend fun saveUserAsync(user: User) = withContext(provider.getIoContext()) { userDao.saveUser(user) }
 
     override suspend fun loginAsync(request: LoginRequest): Deferred<LoginResponse> = throw UnsupportedOperationException()
 

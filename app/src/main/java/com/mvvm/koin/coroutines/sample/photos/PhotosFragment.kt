@@ -15,17 +15,19 @@ import com.mvvm.koin.coroutines.sample.livedata.Event
 import com.mvvm.koin.coroutines.sample.livedata.Status
 import com.mvvm.koin.coroutines.sample.photos.detail.PhotoDetailDialogFragment
 import com.mvvm.koin.coroutines.sample.view.SimpleDividerItemDecorator
+import org.koin.androidx.scope.currentScope
+import org.koin.androidx.viewmodel.ext.koin.viewModel
 
-class PhotosFragment : BaseFragment<PhotosViewModel,FragmentPhotosBinding>(), BaseRecyclerViewAdapter.OnItemClickListener {
+class PhotosFragment : BaseFragment<FragmentPhotosBinding>(), BaseRecyclerViewAdapter.OnItemClickListener {
 
     companion object {
         const val TAG = "PhotosFragment"
         fun newInstance() = PhotosFragment()
     }
 
+    val viewModel by currentScope.viewModel<PhotosViewModel>(this)
 
     override fun getLayoutId(): Int = R.layout.fragment_photos
-    override fun getViewModelClass(): Class<PhotosViewModel> = PhotosViewModel::class.java
     override fun getVariablesToBind(): Map<Int, Any> = mapOf(
             BR.viewModel to viewModel
     )

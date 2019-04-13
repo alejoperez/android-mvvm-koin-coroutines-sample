@@ -7,37 +7,30 @@ import com.nhaarman.mockitokotlin2.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
 import org.junit.Test
+import org.koin.test.inject
+import org.koin.test.mock.declareMock
 import java.lang.UnsupportedOperationException
 
 @Suppress("DeferredResultUnused")
 @ExperimentalCoroutinesApi
-class PhotosRemoteDataSourceTest: BaseTest() {
+class PhotosRemoteDataSourceTest : BaseTest() {
 
-    private val photos = listOf(Photo(1, "", "", "", ""))
-    private val api: IApi = mock()
-
-    private fun resetInteractions() = reset(api)
+    private val photos:List<Photo> = mock()
+    private val api: IApi = declareMock()
+    private val photosRemoteDataSource by inject<PhotosRemoteDataSource>()
 
     @Test(expected = UnsupportedOperationException::class)
     fun savePhotosAsyncTest() {
         runBlocking {
-            val remoteDataSource = PhotosRemoteDataSource(api)
-            try {
-                remoteDataSource.savePhotosAsync(photos)
-            } finally {
-                verifyZeroInteractions(api)
-                resetInteractions()
-            }
+            photosRemoteDataSource.savePhotosAsync(photos)
         }
     }
 
     @Test
     fun getPhotosAsync() {
         runBlocking {
-            val remoteDataSource = PhotosRemoteDataSource(api)
-            remoteDataSource.getPhotosAsync()
+            photosRemoteDataSource.getPhotosAsync()
             verify(api, times(1)).getPhotosAsync()
-            resetInteractions()
         }
     }
 }

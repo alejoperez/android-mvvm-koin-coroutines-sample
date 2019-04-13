@@ -15,9 +15,8 @@ import com.mvvm.koin.coroutines.sample.utils.*
 import com.mvvm.koin.coroutines.sample.webservice.RegisterRequest
 import com.mvvm.koin.coroutines.sample.webservice.RegisterResponse
 import kotlinx.coroutines.*
-import javax.inject.Inject
 
-class RegisterViewModel @Inject constructor(private val userRepository: UserRepository) : BaseViewModel() {
+class RegisterViewModel(private val userRepository: UserRepository) : BaseViewModel() {
 
     val name = ObservableField("")
     val email = ObservableField("")
@@ -34,11 +33,11 @@ class RegisterViewModel @Inject constructor(private val userRepository: UserRepo
     fun register() {
         if (isValidForm()) {
 
-            viewModelScope.launch(contextProvider.Main) {
+            viewModelScope.launch(contextProvider.getMainContext()) {
                 try {
                     showProgress()
 
-                    val response = withContext(contextProvider.IO) {
+                    val response = withContext(contextProvider.getIoContext()) {
                         val request = RegisterRequest(name.getValueOrDefault(), email.getValueOrDefault(), password.getValueOrDefault())
                         userRepository.registerAsync(request).await()
                     }

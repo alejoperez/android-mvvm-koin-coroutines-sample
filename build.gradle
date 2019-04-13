@@ -25,7 +25,7 @@ buildscript {
     ext.glide_version = '4.8.0'
     ext.lifecycle_version = '2.1.0-alpha04'
     ext.room_version = '2.1.0-alpha06'
-    ext.dagger_version = '2.17'
+    ext.koin_version = '2.0.0-rc-2'
     ext.rx_kotlin_version = '2.3.0'
     ext.rx_android_version = '2.1.1'
     ext.retrofit_coroutines_version = '0.9.2'

@@ -19,8 +19,10 @@ import com.mvvm.koin.coroutines.sample.data.room.Place
 import com.mvvm.koin.coroutines.sample.databinding.FragmentPlacesBinding
 import com.mvvm.koin.coroutines.sample.livedata.Event
 import com.mvvm.koin.coroutines.sample.livedata.Status
+import org.koin.androidx.scope.currentScope
+import org.koin.androidx.viewmodel.ext.koin.viewModel
 
-class PlacesFragment: BaseFragment<PlacesViewModel,FragmentPlacesBinding>(), OnMapReadyCallback {
+class PlacesFragment: BaseFragment<FragmentPlacesBinding>(), OnMapReadyCallback {
 
     companion object {
         private const val ZOOM = 4f
@@ -28,8 +30,10 @@ class PlacesFragment: BaseFragment<PlacesViewModel,FragmentPlacesBinding>(), OnM
         fun newInstance() = PlacesFragment()
     }
 
+    val viewModel by currentScope.viewModel<PlacesViewModel>(this)
+
     override fun getLayoutId(): Int = R.layout.fragment_places
-    override fun getViewModelClass(): Class<PlacesViewModel> = PlacesViewModel::class.java
+
     override fun getVariablesToBind(): Map<Int, Any> = mapOf(
             BR.viewModel to viewModel
     )

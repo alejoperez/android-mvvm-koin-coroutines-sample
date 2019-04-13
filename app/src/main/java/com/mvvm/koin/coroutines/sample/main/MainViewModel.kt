@@ -9,16 +9,15 @@ import com.mvvm.koin.coroutines.sample.livedata.Event
 import com.mvvm.koin.coroutines.sample.utils.getEventError
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import javax.inject.Inject
 
-class MainViewModel @Inject constructor(private val userRepository: UserRepository) : BaseViewModel() {
+class MainViewModel(private val userRepository: UserRepository) : BaseViewModel() {
 
     val user = MutableLiveData<Event<User>>()
 
     fun getUser() {
-        viewModelScope.launch(contextProvider.Main) {
+        viewModelScope.launch(contextProvider.getMainContext()) {
             try {
-                val response = withContext(contextProvider.IO) { userRepository.getUserAsync().await() }
+                val response = withContext(contextProvider.getIoContext()) { userRepository.getUserAsync().await() }
                 user.value = Event.success(response)
             } catch (e: Exception) {
                 user.value = e.getEventError()

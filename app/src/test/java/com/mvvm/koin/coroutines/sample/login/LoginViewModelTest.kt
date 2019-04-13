@@ -13,6 +13,8 @@ import com.nhaarman.mockitokotlin2.whenever
 import kotlinx.coroutines.*
 import org.junit.Assert
 import org.junit.Test
+import org.koin.test.inject
+import org.koin.test.mock.declareMock
 import retrofit2.HttpException
 
 @Suppress("DeferredResultUnused")
@@ -41,8 +43,8 @@ class LoginViewModelTest : BaseTest() {
         const val MSG_INVALID_STATUS_NETWORK_ERROR = "Status should de NETWORK_ERROR"
     }
 
-    private val userRepository: UserRepository = mock()
-    private val viewModel = LoginViewModel(userRepository).apply { contextProvider = TestContextProvider() }
+    private val userRepository: UserRepository = declareMock()
+    private val viewModel by inject<LoginViewModel>()
 
     @Test
     fun isValidEmailTest() {
@@ -154,10 +156,11 @@ class LoginViewModelTest : BaseTest() {
     }
 
     @Test
-    fun loginSuccessTest() = runBlocking {
-
-        val loginResponse = LoginResponse(true, 1, "Alejo", "alejo@gmail.com", "token")
-        whenever(runBlocking { userRepository.loginAsync(any()) }).thenReturn(loginResponse.toDeferred())
+    fun loginSuccessTest() {
+        runBlocking {
+            val loginResponse = mock<LoginResponse>()
+            whenever(userRepository.loginAsync(any())).thenReturn(loginResponse.toDeferred())
+        }
 
         viewModel.email.set("alejo@gmail.com")
         viewModel.password.set("123456")
@@ -170,13 +173,13 @@ class LoginViewModelTest : BaseTest() {
         val event = viewModel.loginEvent.value
         Assert.assertNotNull(MSG_EVENT_NULL_VALUE, event)
         Assert.assertEquals(MSG_INVALID_STATUS_SUCCESS, Status.SUCCESS, event?.status)
-
     }
 
     @Test
-    fun loginFailureTest() = runBlocking {
-        doThrow(HttpException(mock())).whenever(userRepository).loginAsync(any())
-
+    fun loginFailureTest() {
+        runBlocking {
+            doThrow(HttpException(mock())).whenever(userRepository).loginAsync(any())
+        }
 
         viewModel.email.set("alejo@gmail.com")
         viewModel.password.set("123456")
@@ -190,8 +193,10 @@ class LoginViewModelTest : BaseTest() {
     }
 
     @Test
-    fun loginNetworkErrorTest() = runBlocking {
-        doThrow(RuntimeException()).whenever(userRepository).loginAsync(any())
+    fun loginNetworkErrorTest() {
+        runBlocking {
+            doThrow(RuntimeException()).whenever(userRepository).loginAsync(any())
+        }
 
         viewModel.email.set("alejo@gmail.com")
         viewModel.password.set("123456")

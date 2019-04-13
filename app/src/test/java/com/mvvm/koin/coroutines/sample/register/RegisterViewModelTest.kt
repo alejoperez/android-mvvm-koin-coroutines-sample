@@ -14,16 +14,18 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert
 import org.junit.Test
+import org.koin.test.inject
+import org.koin.test.mock.declareMock
 import retrofit2.HttpException
 
 @Suppress("DeferredResultUnused")
 @ExperimentalCoroutinesApi
-class RegisterViewModelTest: BaseTest() {
+class RegisterViewModelTest : BaseTest() {
 
     companion object {
         const val MSG_VALID_NAME = "Name should be valid"
         const val MSG_INVALID_NAME = "Name should be invalid"
-        
+
         const val MSG_VALID_EMAIL = "Email should be valid"
         const val MSG_INVALID_EMAIL = "Email should be invalid"
 
@@ -46,8 +48,8 @@ class RegisterViewModelTest: BaseTest() {
         const val MSG_INVALID_STATUS_NETWORK_ERROR = "Status should de NETWORK_ERROR"
     }
 
-    private val userRepository: UserRepository = mock()
-    private val viewModel = RegisterViewModel(userRepository).apply { contextProvider = TestContextProvider() }
+    private val userRepository: UserRepository = declareMock()
+    private val viewModel by inject<RegisterViewModel>()
 
     @Test
     fun isValidNameTest() {
@@ -189,10 +191,11 @@ class RegisterViewModelTest: BaseTest() {
     }
 
     @Test
-    fun registerSuccessTest() = runBlocking {
-
-        val response = RegisterResponse( 1, "Alejo", "alejo@gmail.com", "token")
-        whenever(runBlocking { userRepository.registerAsync(any()) }).thenReturn(response.toDeferred())
+    fun registerSuccessTest() {
+        runBlocking {
+            val response = mock<RegisterResponse>()
+            whenever(userRepository.registerAsync(any())).thenReturn(response.toDeferred())
+        }
 
         viewModel.name.set("alejo")
         viewModel.email.set("alejo@gmail.com")
@@ -207,14 +210,13 @@ class RegisterViewModelTest: BaseTest() {
         val event = viewModel.registerEvent.value
         Assert.assertNotNull(MSG_EVENT_NULL_VALUE, event)
         Assert.assertEquals(MSG_INVALID_STATUS_SUCCESS, Status.SUCCESS, event?.status)
-
     }
 
     @Test
-    fun registerFailureTest() = runBlocking {
-        doThrow(HttpException(mock())).whenever(userRepository).registerAsync(any())
-
-
+    fun registerFailureTest() {
+        runBlocking {
+            doThrow(HttpException(mock())).whenever(userRepository).registerAsync(any())
+        }
         viewModel.name.set("alejo")
         viewModel.email.set("alejo@gmail.com")
         viewModel.password.set("123456")
@@ -231,8 +233,10 @@ class RegisterViewModelTest: BaseTest() {
     }
 
     @Test
-    fun registerNetworkErrorTest() = runBlocking {
-        doThrow(RuntimeException()).whenever(userRepository).registerAsync(any())
+    fun registerNetworkErrorTest() {
+        runBlocking {
+            doThrow(RuntimeException()).whenever(userRepository).registerAsync(any())
+        }
 
         viewModel.name.set("alejo")
         viewModel.email.set("alejo@gmail.com")
@@ -248,5 +252,5 @@ class RegisterViewModelTest: BaseTest() {
         Assert.assertNotNull(MSG_EVENT_NULL_VALUE, event)
         Assert.assertEquals(MSG_INVALID_STATUS_NETWORK_ERROR, Status.NETWORK_ERROR, event?.status)
     }
-    
+
 }

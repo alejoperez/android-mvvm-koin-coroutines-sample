@@ -6,55 +6,56 @@ import com.nhaarman.mockitokotlin2.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
 import org.junit.Test
+import org.koin.test.inject
+import org.koin.test.mock.declareMock
 
 @Suppress("DeferredResultUnused")
 @ExperimentalCoroutinesApi
 class PhotosRepositoryTest: BaseTest() {
 
-    private val photos = emptyList<Photo>()
+    private val photos: List<Photo> = mock()
 
-    private val localDataSource = mock<PhotosLocalDataSource>()
-    private val remoteDataSource = mock<PhotosRemoteDataSource>()
+    private val localDataSource: PhotosLocalDataSource = declareMock()
+    private val remoteDataSource: PhotosRemoteDataSource = declareMock()
 
+    private val photosRepository by inject<PhotosRepository>()
 
-    private fun resetInteractions() {
-        reset(localDataSource, remoteDataSource)
+    @Test
+    fun getPhotosAsyncCacheTest() {
+        runBlocking {
+            photosRepository.hasCache = true
+            photosRepository.getPhotosAsync()
+
+            verifyZeroInteractions(remoteDataSource)
+            verify(localDataSource, times(1)).getPhotosAsync()
+        }
     }
 
     @Test
-    fun getPhotosAsyncCacheTest() = runBlocking {
-        val repository = PhotosRepository(localDataSource, remoteDataSource)
-        repository.hasCache = true
-        repository.getPhotosAsync()
+    fun getPhotosAsyncRemoteTest() {
+        runBlocking {
 
-        verifyZeroInteractions(remoteDataSource)
-        verify(localDataSource, times(1)).getPhotosAsync()
-        resetInteractions()
+            whenever(remoteDataSource.getPhotosAsync()).thenReturn(photos.toDeferred())
+
+            photosRepository.hasCache = false
+            photosRepository.getPhotosAsync()
+
+            verify(remoteDataSource, times(1)).getPhotosAsync()
+            verify(localDataSource, times(1)).savePhotosAsync(photos)
+
+        }
     }
 
     @Test
-    fun getPhotosAsyncRemoteTest() = runBlocking {
+    fun savePhotosAsyncTest() {
+        runBlocking {
+            photosRepository.hasCache = true
+            photosRepository.savePhotosAsync(photos)
 
-        whenever(remoteDataSource.getPhotosAsync()).thenReturn(photos.toDeferred())
+            verifyZeroInteractions(remoteDataSource)
+            verify(localDataSource, times(1)).savePhotosAsync(photos)
 
-        val repository = PhotosRepository(localDataSource, remoteDataSource)
-        repository.hasCache = false
-        repository.getPhotosAsync()
-
-        verify(remoteDataSource, times(1)).getPhotosAsync()
-        verify(localDataSource, times(1)).savePhotosAsync(photos)
-        resetInteractions()
-    }
-
-    @Test
-    fun savePhotosAsyncTest() = runBlocking {
-        val repository = PhotosRepository(localDataSource, remoteDataSource)
-        repository.hasCache = true
-        repository.savePhotosAsync(photos)
-
-        verifyZeroInteractions(remoteDataSource)
-        verify(localDataSource, times(1)).savePhotosAsync(photos)
-        resetInteractions()
+        }
     }
 
 }

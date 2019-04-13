@@ -1,27 +1,16 @@
 package com.mvvm.koin.coroutines.sample.webservice
 
-import androidx.test.platform.app.InstrumentationRegistry
 import com.mvvm.koin.coroutines.sample.base.BaseTest
-import com.mvvm.koin.coroutines.sample.data.preference.PreferenceManager
-import com.mvvm.koin.coroutines.sample.di.WebServiceModule
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert
-import org.junit.Before
 import org.junit.Test
-
+import org.koin.test.inject
 
 @ExperimentalCoroutinesApi
 class IApiTest: BaseTest() {
 
-    private lateinit var api: IApi
-
-    @Before
-    fun setUp() {
-        val okHttpClient = WebServiceModule().provideOkHttpClient(PreferenceManager(InstrumentationRegistry.getInstrumentation().targetContext))
-        val retrofit = WebServiceModule().provideRetrofit(okHttpClient)
-        api = WebServiceModule().provideApi(retrofit)
-    }
+    private val api by inject<IApi>()
 
     @Test
     fun loginAsyncTest() {

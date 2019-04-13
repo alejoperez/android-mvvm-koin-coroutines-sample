@@ -9,16 +9,15 @@ import com.mvvm.koin.coroutines.sample.livedata.Event
 import com.mvvm.koin.coroutines.sample.utils.getEventError
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import javax.inject.Inject
 
-class PlacesViewModel @Inject constructor(private val placesRepository: PlacesRepository): BaseViewModel() {
+class PlacesViewModel(private val placesRepository: PlacesRepository): BaseViewModel() {
 
     val places = MutableLiveData<Event<List<Place>>>()
 
     fun getPlaces() {
-        viewModelScope.launch(contextProvider.Main) {
+        viewModelScope.launch(contextProvider.getMainContext()) {
             try {
-                val response = withContext(contextProvider.IO) { placesRepository.getPlacesAsync().await() }
+                val response = withContext(contextProvider.getIoContext()) { placesRepository.getPlacesAsync().await() }
                 places.value = Event.success(response)
             } catch (t: Throwable) {
                 places.value = t.getEventError()

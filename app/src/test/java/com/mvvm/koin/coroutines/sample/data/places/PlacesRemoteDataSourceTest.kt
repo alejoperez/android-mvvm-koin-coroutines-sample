@@ -7,26 +7,25 @@ import com.nhaarman.mockitokotlin2.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
 import org.junit.Test
+import org.koin.test.inject
+import org.koin.test.mock.declareMock
 import java.lang.UnsupportedOperationException
 
 @Suppress("DeferredResultUnused")
 @ExperimentalCoroutinesApi
 class PlacesRemoteDataSourceTest : BaseTest() {
 
-    private val places = listOf(Place(1, "", "", 0.0, 0.0))
-    private val api: IApi = mock()
-
-    private fun resetInteractions() = reset(api)
+    private val places: List<Place> = mock()
+    private val api: IApi = declareMock()
+    private val placesRemoteDataSource by inject<PlacesRemoteDataSource>()
 
     @Test(expected = UnsupportedOperationException::class)
     fun savePlacesAsyncTest() {
         runBlocking {
-            val remoteDataSource = PlacesRemoteDataSource(api)
             try {
-                remoteDataSource.savePlacesAsync(places)
+                placesRemoteDataSource.savePlacesAsync(places)
             } finally {
                 verifyZeroInteractions(api)
-                resetInteractions()
             }
         }
     }
@@ -34,10 +33,8 @@ class PlacesRemoteDataSourceTest : BaseTest() {
     @Test
     fun getPlacesAsync() {
         runBlocking {
-            val remoteDataSource = PlacesRemoteDataSource(api)
-            remoteDataSource.getPlacesAsync()
+            placesRemoteDataSource.getPlacesAsync()
             verify(api, times(1)).getPlacesAsync()
-            resetInteractions()
         }
     }
 

@@ -12,11 +12,13 @@ import kotlinx.coroutines.runBlocking
 import org.junit.Assert
 import org.junit.Assert.*
 import org.junit.Test
+import org.koin.test.inject
+import org.koin.test.mock.declareMock
 import retrofit2.HttpException
 
 @Suppress("DeferredResultUnused")
 @ExperimentalCoroutinesApi
-class MainViewModelTest: BaseTest() {
+class MainViewModelTest : BaseTest() {
 
     companion object {
         const val MSG_EVENT_NULL_VALUE = "Even shouldn't be null"
@@ -25,26 +27,27 @@ class MainViewModelTest: BaseTest() {
         const val MSG_INVALID_STATUS_NETWORK_ERROR = "Status should de NETWORK_ERROR"
     }
 
-    private val userRepository: UserRepository = mock()
-    private val viewModel = MainViewModel(userRepository).apply { contextProvider = TestContextProvider() }
+    private val userRepository: UserRepository = declareMock()
+    private val viewModel by inject<MainViewModel>()
 
     @Test
     fun getUserSuccessTest() {
-        val response = User(1, "alejo", "alejo@gmail.com")
-        whenever(runBlocking { userRepository.getUserAsync() }).thenReturn(response.toDeferred())
-
+        runBlocking {
+            val response = mock<User>()
+            whenever(userRepository.getUserAsync()).thenReturn(response.toDeferred())
+        }
         viewModel.getUser()
 
         val event = viewModel.user.value
         Assert.assertNotNull(MSG_EVENT_NULL_VALUE, event)
         Assert.assertEquals(MSG_INVALID_STATUS_SUCCESS, Status.SUCCESS, event?.status)
-
     }
 
     @Test
-    fun getUserErrorTest() = runBlocking {
-        doThrow(HttpException(mock())).whenever(userRepository).getUserAsync()
-
+    fun getUserErrorTest() {
+        runBlocking {
+            doThrow(HttpException(mock())).whenever(userRepository).getUserAsync()
+        }
         viewModel.getUser()
 
         val event = viewModel.user.value
@@ -54,15 +57,17 @@ class MainViewModelTest: BaseTest() {
     }
 
     @Test
-    fun getUserNetworkErrorTest() = runBlocking {
-        doThrow(RuntimeException()).whenever(userRepository).getUserAsync()
+    fun getUserNetworkErrorTest() {
+        runBlocking {
+            doThrow(RuntimeException()).whenever(userRepository).getUserAsync()
 
-        viewModel.getUser()
+            viewModel.getUser()
 
-        val event = viewModel.user.value
+            val event = viewModel.user.value
 
-        assertNotNull(MSG_EVENT_NULL_VALUE, event)
-        assertEquals(MSG_INVALID_STATUS_NETWORK_ERROR, Status.NETWORK_ERROR, event?.status)
+            assertNotNull(MSG_EVENT_NULL_VALUE, event)
+            assertEquals(MSG_INVALID_STATUS_NETWORK_ERROR, Status.NETWORK_ERROR, event?.status)
+        }
     }
 
 }

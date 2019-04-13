@@ -9,11 +9,15 @@ import com.mvvm.koin.coroutines.sample.BR
 import com.mvvm.koin.coroutines.sample.R
 import com.mvvm.koin.coroutines.sample.data.room.Photo
 import com.mvvm.koin.coroutines.sample.databinding.DialogPhotoDetailBinding
+import org.koin.androidx.scope.currentScope
+import org.koin.androidx.viewmodel.ext.koin.viewModel
 
-class PhotoDetailDialogFragment : BaseDialogFragment<PhotoDetailViewModel, DialogPhotoDetailBinding>() {
+class PhotoDetailDialogFragment : BaseDialogFragment<DialogPhotoDetailBinding>() {
+
+    val viewModel by currentScope.viewModel<PhotoDetailViewModel>(this)
 
     override fun getLayoutId(): Int = R.layout.dialog_photo_detail
-    override fun getViewModelClass(): Class<PhotoDetailViewModel> = PhotoDetailViewModel::class.java
+
     override fun getVariablesToBind(): Map<Int, Any> = mapOf(
             BR.photo to arguments?.getParcelable(PHOTO) as Photo
     )

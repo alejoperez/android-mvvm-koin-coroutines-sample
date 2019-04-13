@@ -9,16 +9,19 @@ import com.mvvm.koin.coroutines.sample.databinding.ActivitySplashBinding
 import com.mvvm.koin.coroutines.sample.main.MainActivity
 import com.mvvm.koin.coroutines.sample.register.RegisterActivity
 import org.jetbrains.anko.startActivity
+import org.koin.androidx.scope.currentScope
+import org.koin.androidx.viewmodel.ext.koin.viewModel
 
-class SplashActivity : BaseActivity<SplashViewModel, ActivitySplashBinding>() {
+class SplashActivity : BaseActivity<ActivitySplashBinding>() {
 
     companion object {
         const val SPLASH_DELAY = 2000L
     }
 
     override fun getLayoutId(): Int = R.layout.activity_splash
-    override fun getViewModelClass(): Class<SplashViewModel> = SplashViewModel::class.java
     override fun getVariablesToBind(): Map<Int, Any> = emptyMap()
+
+    val viewModel by currentScope.viewModel<SplashViewModel>(this)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

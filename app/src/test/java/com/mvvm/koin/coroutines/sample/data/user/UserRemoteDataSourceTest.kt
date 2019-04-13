@@ -9,6 +9,8 @@ import com.nhaarman.mockitokotlin2.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
 import org.junit.Test
+import org.koin.test.inject
+import org.koin.test.mock.declareMock
 
 @Suppress("DeferredResultUnused")
 @ExperimentalCoroutinesApi
@@ -17,58 +19,53 @@ class UserRemoteDataSourceTest : BaseTest() {
     private val user: User = mock()
     private val loginRequest: LoginRequest = mock()
     private val registerRequest: RegisterRequest = mock()
-    private val api: IApi = mock()
 
-    private fun resetInteractions() = reset(api)
+    private val api: IApi = declareMock()
+
+    private val userRemoteDataSource by inject<UserRemoteDataSource>()
 
     @Test
-    fun loginAsyncTest() = runBlocking {
-        val remoteDataSource = UserRemoteDataSource(api)
-        remoteDataSource.loginAsync(loginRequest)
-        verify(api, times(1)).loginAsync(loginRequest)
-        resetInteractions()
+    fun loginAsyncTest() {
+        runBlocking {
+            userRemoteDataSource.loginAsync(loginRequest)
+            verify(api, times(1)).loginAsync(loginRequest)
+        }
     }
 
     @Test
-    fun registerAsyncTest() = runBlocking {
-        val remoteDataSource = UserRemoteDataSource(api)
-        remoteDataSource.registerAsync(registerRequest)
-        verify(api, times(1)).registerAsync(registerRequest)
-        resetInteractions()
+    fun registerAsyncTest() {
+        runBlocking {
+            userRemoteDataSource.registerAsync(registerRequest)
+            verify(api, times(1)).registerAsync(registerRequest)
+        }
     }
 
     @Test(expected = UnsupportedOperationException::class)
-    fun getUserAsyncTest() = runBlocking {
-        val remoteDataSource = UserRemoteDataSource(api)
-        remoteDataSource.getUserAsync()
-        resetInteractions()
+    fun getUserAsyncTest() {
+        runBlocking {
+            userRemoteDataSource.getUserAsync()
+        }
     }
 
     @Test(expected = UnsupportedOperationException::class)
     fun saveUserAsyncTest() {
         runBlocking {
             try {
-                val remoteDataSource = UserRemoteDataSource(api)
-                remoteDataSource.saveUserAsync(user)
+                userRemoteDataSource.saveUserAsync(user)
             } finally {
                 verifyZeroInteractions(api)
-                resetInteractions()
             }
         }
     }
 
     @Test(expected = UnsupportedOperationException::class)
     fun isLoggedInTest() {
-        val remoteDataSource = UserRemoteDataSource(api)
-        remoteDataSource.isLoggedIn()
-        resetInteractions()
+        userRemoteDataSource.isLoggedIn()
     }
 
     @Test(expected = UnsupportedOperationException::class)
     fun logoutTest() {
-        val remoteDataSource = UserRemoteDataSource(api)
-        remoteDataSource.isLoggedIn()
-        resetInteractions()
+        userRemoteDataSource.isLoggedIn()
     }
 
 }

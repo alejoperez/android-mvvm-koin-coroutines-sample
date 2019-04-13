@@ -9,35 +9,19 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.VisibleForTesting
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.ViewModelProviders
 import com.mvvm.koin.coroutines.sample.R
-import dagger.android.support.AndroidSupportInjection
 import org.jetbrains.anko.alert
 import org.jetbrains.anko.yesButton
-import javax.inject.Inject
 
-abstract class BaseFragment<VM: BaseViewModel,DB: ViewDataBinding>: Fragment(), IBaseView {
-
-    @Inject
-    lateinit var viewModelFactory: ViewModelProvider.Factory
+abstract class BaseFragment<DB: ViewDataBinding>: Fragment(), IBaseView {
 
     private lateinit var fragmentContext: Context
 
     @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
     lateinit var dataBinding: DB
 
-    @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
-    lateinit var viewModel: VM
-
     abstract fun getLayoutId() : Int
-    abstract fun getViewModelClass(): Class<VM>
     abstract fun getVariablesToBind(): Map<Int,Any>
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        AndroidSupportInjection.inject(this)
-    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         initViewModel()
@@ -45,9 +29,7 @@ abstract class BaseFragment<VM: BaseViewModel,DB: ViewDataBinding>: Fragment(), 
         return dataBinding.root
     }
 
-    open fun initViewModel() {
-        viewModel = obtainViewModel(getViewModelClass())
-    }
+    open fun initViewModel() {}
 
     open fun initView(inflater: LayoutInflater, container: ViewGroup?) {
         dataBinding = DataBindingUtil.inflate(inflater, getLayoutId(), container, false)
@@ -76,8 +58,6 @@ abstract class BaseFragment<VM: BaseViewModel,DB: ViewDataBinding>: Fragment(), 
     }
 
     override fun getViewContext(): Context = fragmentContext
-
-    override fun <T : BaseViewModel> obtainViewModel(clazz: Class<T>): T = ViewModelProviders.of(this,viewModelFactory).get(clazz)
 
     override fun onNetworkError() = showAlert(R.string.error_network)
 }

@@ -1,10 +1,10 @@
 package com.mvvm.koin.coroutines.sample.data.preference
 
-import androidx.test.platform.app.InstrumentationRegistry
 import com.mvvm.koin.coroutines.sample.base.BaseTest
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.junit.Assert
 import org.junit.Test
+import org.koin.test.inject
 
 @ExperimentalCoroutinesApi
 class PreferenceManagerTest: BaseTest() {
@@ -17,7 +17,7 @@ class PreferenceManagerTest: BaseTest() {
         const val FLOAT_KEY = "float"
     }
 
-    private val preferenceManager = PreferenceManager(InstrumentationRegistry.getInstrumentation().targetContext)
+    private val preferenceManager by inject<PreferenceManager>()
 
     @Test
     fun longPreference(){

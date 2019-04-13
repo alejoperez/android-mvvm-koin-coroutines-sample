@@ -1,1 +1,1 @@
-# android-mvvm-dagger-coroutines-sample
+# android-mvvm-koin-coroutines-sample

@@ -17,11 +17,14 @@ import com.mvvm.koin.coroutines.sample.livedata.Status
 import com.mvvm.koin.coroutines.sample.photos.PhotosFragment
 import com.mvvm.koin.coroutines.sample.places.PlacesFragment
 import kotlinx.android.synthetic.main.toolbar.*
+import org.koin.androidx.scope.currentScope
+import org.koin.androidx.viewmodel.ext.koin.viewModel
 
-class MainActivity : BaseActivity<MainViewModel, ActivityMainBinding>(), NavigationView.OnNavigationItemSelectedListener {
+class MainActivity : BaseActivity< ActivityMainBinding>(), NavigationView.OnNavigationItemSelectedListener {
+
+    val viewModel by currentScope.viewModel<MainViewModel>(this)
 
     override fun getLayoutId(): Int = R.layout.activity_main
-    override fun getViewModelClass(): Class<MainViewModel> = MainViewModel::class.java
     override fun getVariablesToBind(): Map<Int, Any> = emptyMap()
 
     override fun onCreate(savedInstanceState: Bundle?) {

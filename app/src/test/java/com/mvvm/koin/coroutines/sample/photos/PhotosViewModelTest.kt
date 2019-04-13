@@ -12,11 +12,13 @@ import kotlinx.coroutines.runBlocking
 import org.junit.Assert
 import org.junit.Assert.*
 import org.junit.Test
+import org.koin.test.inject
+import org.koin.test.mock.declareMock
 import retrofit2.HttpException
 
 @Suppress("DeferredResultUnused")
 @ExperimentalCoroutinesApi
-class PhotosViewModelTest: BaseTest() {
+class PhotosViewModelTest : BaseTest() {
 
     companion object {
         const val MSG_PROGRESS_TRUE = "Progress should be true"
@@ -28,8 +30,8 @@ class PhotosViewModelTest: BaseTest() {
         const val MSG_INVALID_STATUS_NETWORK_ERROR = "Status should de NETWORK_ERROR"
     }
 
-    private val photosRepository: PhotosRepository = mock()
-    private val viewModel = PhotosViewModel(photosRepository).apply { contextProvider = TestContextProvider() }
+    private val photosRepository: PhotosRepository = declareMock()
+    private val viewModel by inject<PhotosViewModel>()
 
     @Test
     fun showProgressTest() {
@@ -45,23 +47,23 @@ class PhotosViewModelTest: BaseTest() {
 
 
     @Test
-    fun photosSuccessTest() = runBlocking {
-
-        val response = listOf(Photo(1,"","","",""))
-        whenever(runBlocking { photosRepository.getPhotosAsync() }).thenReturn(response.toDeferred())
-
+    fun photosSuccessTest() {
+        runBlocking {
+            val response = mock<List<Photo>>()
+            whenever(photosRepository.getPhotosAsync()).thenReturn(response.toDeferred())
+        }
         viewModel.getPhotos()
 
         val event = viewModel.photos.value
         assertNotNull(MSG_EVENT_NULL_VALUE, event)
         assertEquals(MSG_INVALID_STATUS_SUCCESS, Status.SUCCESS, event?.status)
-
     }
 
     @Test
-    fun photosFailureTest() = runBlocking {
-        doThrow(HttpException(mock())).whenever(photosRepository).getPhotosAsync()
-
+    fun photosFailureTest() {
+        runBlocking {
+            doThrow(HttpException(mock())).whenever(photosRepository).getPhotosAsync()
+        }
         viewModel.getPhotos()
 
         val event = viewModel.photos.value
@@ -69,10 +71,12 @@ class PhotosViewModelTest: BaseTest() {
         assertEquals(MSG_INVALID_STATUS_FAILURE, Status.FAILURE, event?.status)
     }
 
-    @Test
-    fun photosNetworkErrorTest() = runBlocking {
-        doThrow(RuntimeException()).whenever(photosRepository).getPhotosAsync()
 
+    @Test
+    fun photosNetworkErrorTest() {
+        runBlocking {
+            doThrow(RuntimeException()).whenever(photosRepository).getPhotosAsync()
+        }
         viewModel.getPhotos()
 
         val event = viewModel.photos.value

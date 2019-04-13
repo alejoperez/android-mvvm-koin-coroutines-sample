@@ -1,6 +1,5 @@
 package com.mvvm.koin.coroutines.sample.data.user
 
-import com.mvvm.koin.coroutines.sample.data.BaseRepositoryModule
 import com.mvvm.koin.coroutines.sample.data.room.User
 import com.mvvm.koin.coroutines.sample.data.preference.PreferenceManager
 import com.mvvm.koin.coroutines.sample.webservice.LoginRequest
@@ -8,15 +7,10 @@ import com.mvvm.koin.coroutines.sample.webservice.LoginResponse
 import com.mvvm.koin.coroutines.sample.webservice.RegisterRequest
 import com.mvvm.koin.coroutines.sample.webservice.RegisterResponse
 import kotlinx.coroutines.Deferred
-import javax.inject.Inject
-import javax.inject.Named
-import javax.inject.Singleton
 
-@Singleton
-class UserRepository
-@Inject constructor(@Named(BaseRepositoryModule.LOCAL) private val localDataSource: IUserDataSource,
-                    @Named(BaseRepositoryModule.REMOTE) private val remoteDataSource: IUserDataSource,
-                    private val preferenceManager: PreferenceManager) : IUserDataSource {
+class UserRepository(private val localDataSource: UserLocalDataSource,
+                     private val remoteDataSource: UserRemoteDataSource,
+                     private val preferenceManager: PreferenceManager) : IUserDataSource {
 
     override suspend fun saveUserAsync(user: User) = localDataSource.saveUserAsync(user)
 

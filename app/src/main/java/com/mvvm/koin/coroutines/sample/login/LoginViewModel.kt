@@ -16,9 +16,8 @@ import com.mvvm.koin.coroutines.sample.webservice.LoginRequest
 import com.mvvm.koin.coroutines.sample.webservice.LoginResponse
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import javax.inject.Inject
 
-class LoginViewModel @Inject constructor(private val userRepository: UserRepository): BaseViewModel() {
+class LoginViewModel(private val userRepository: UserRepository): BaseViewModel() {
 
     val email = ObservableField("")
     val password = ObservableField("")
@@ -42,11 +41,11 @@ class LoginViewModel @Inject constructor(private val userRepository: UserReposit
     fun login() {
         if (isValidForm()) {
 
-            viewModelScope.launch(contextProvider.Main) {
+            viewModelScope.launch(contextProvider.getMainContext()) {
 
                 try {
                     showProgress()
-                    val response = withContext(contextProvider.IO) {
+                    val response = withContext(contextProvider.getIoContext()) {
                         val loginRequest = LoginRequest(email.getValueOrDefault(), password.getValueOrDefault())
                         userRepository.loginAsync(loginRequest).await()
 

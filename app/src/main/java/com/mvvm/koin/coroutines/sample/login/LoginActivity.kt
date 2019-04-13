@@ -12,11 +12,14 @@ import com.mvvm.koin.coroutines.sample.main.MainActivity
 import com.mvvm.koin.coroutines.sample.utils.EditTextUtils
 import com.mvvm.koin.coroutines.sample.webservice.LoginResponse
 import org.jetbrains.anko.startActivity
+import org.koin.androidx.scope.currentScope
+import org.koin.androidx.viewmodel.ext.koin.viewModel
 
-class LoginActivity : BaseActivity<LoginViewModel,ActivityLoginBinding>() {
+class LoginActivity : BaseActivity<ActivityLoginBinding>() {
+
+    val viewModel by currentScope.viewModel<LoginViewModel>(this)
 
     override fun getLayoutId(): Int = R.layout.activity_login
-    override fun getViewModelClass(): Class<LoginViewModel> = LoginViewModel::class.java
     override fun getVariablesToBind(): Map<Int, Any> = mapOf(
             BR.viewModel to viewModel,
             BR.etUtils to EditTextUtils

@@ -7,32 +7,18 @@ import androidx.databinding.ViewDataBinding
 import android.os.Bundle
 import android.view.LayoutInflater
 import androidx.fragment.app.DialogFragment
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.ViewModelProviders
 import com.mvvm.koin.coroutines.sample.R
-import dagger.android.support.AndroidSupportInjection
 import org.jetbrains.anko.alert
 import org.jetbrains.anko.yesButton
-import javax.inject.Inject
 
-abstract class BaseDialogFragment<VM: BaseViewModel,DB: ViewDataBinding>: DialogFragment(), IBaseView {
-
-    @Inject
-    lateinit var viewModelFactory: ViewModelProvider.Factory
+abstract class BaseDialogFragment<DB: ViewDataBinding>: DialogFragment(), IBaseView {
 
     private lateinit var fragmentContext: Context
 
     protected lateinit var dataBinding: DB
-    protected lateinit var viewModel: VM
 
     abstract fun getLayoutId() : Int
-    abstract fun getViewModelClass(): Class<VM>
     abstract fun getVariablesToBind(): Map<Int,Any>
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        AndroidSupportInjection.inject(this)
-    }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         initViewModel()
@@ -41,7 +27,6 @@ abstract class BaseDialogFragment<VM: BaseViewModel,DB: ViewDataBinding>: Dialog
     }
 
     open fun initViewModel() {
-        viewModel = obtainViewModel(getViewModelClass())
     }
 
     open fun initView() {
@@ -71,8 +56,6 @@ abstract class BaseDialogFragment<VM: BaseViewModel,DB: ViewDataBinding>: Dialog
     }
 
     override fun getViewContext(): Context = fragmentContext
-
-    override fun <T : BaseViewModel> obtainViewModel(clazz: Class<T>): T = ViewModelProviders.of(this,viewModelFactory).get(clazz)
 
     override fun onNetworkError() = showAlert(R.string.error_network)
 }

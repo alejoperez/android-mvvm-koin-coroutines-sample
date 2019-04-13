@@ -1,18 +1,11 @@
 package com.mvvm.koin.coroutines.sample.data.photos
 
 import androidx.annotation.VisibleForTesting
-import com.mvvm.koin.coroutines.sample.data.BaseRepositoryModule
 import com.mvvm.koin.coroutines.sample.data.room.Photo
 import kotlinx.coroutines.Deferred
-import javax.inject.Inject
-import javax.inject.Named
-import javax.inject.Singleton
 
-@Singleton
-class PhotosRepository
-@Inject
-constructor(@Named(BaseRepositoryModule.LOCAL) private val localDataSource: IPhotosDataSource,
-            @Named(BaseRepositoryModule.REMOTE) private val  remoteDataSource: IPhotosDataSource) : IPhotosDataSource {
+class PhotosRepository(private val localDataSource: PhotosLocalDataSource,
+                       private val remoteDataSource: PhotosRemoteDataSource) : IPhotosDataSource {
 
 
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)

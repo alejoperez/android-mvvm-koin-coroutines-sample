@@ -13,12 +13,14 @@ import com.mvvm.koin.coroutines.sample.main.MainActivity
 import com.mvvm.koin.coroutines.sample.utils.EditTextUtils
 import com.mvvm.koin.coroutines.sample.webservice.RegisterResponse
 import org.jetbrains.anko.startActivity
+import org.koin.androidx.scope.currentScope
+import org.koin.androidx.viewmodel.ext.koin.viewModel
 
-class RegisterActivity : BaseActivity<RegisterViewModel,ActivityRegisterBinding>() {
+class RegisterActivity : BaseActivity<ActivityRegisterBinding>() {
+
+    val viewModel by currentScope.viewModel<RegisterViewModel>(this)
 
     override fun getLayoutId() = R.layout.activity_register
-
-    override fun getViewModelClass(): Class<RegisterViewModel> = RegisterViewModel::class.java
 
     override fun getVariablesToBind(): Map<Int, Any> = mapOf(
             BR.viewModel to viewModel,

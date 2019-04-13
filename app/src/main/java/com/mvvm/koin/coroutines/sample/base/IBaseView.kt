@@ -10,7 +10,5 @@ interface IBaseView {
 
     fun getViewContext(): Context
 
-    fun <T: BaseViewModel> obtainViewModel(clazz: Class<T>): T
-
     fun onNetworkError()
 }

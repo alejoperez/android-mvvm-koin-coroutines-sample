@@ -3,11 +3,8 @@ package com.mvvm.koin.coroutines.sample.data.user
 import com.mvvm.koin.coroutines.sample.data.room.User
 import com.mvvm.koin.coroutines.sample.webservice.*
 import kotlinx.coroutines.Deferred
-import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
-class UserRemoteDataSource @Inject constructor(private val api: IApi): IUserDataSource {
+class UserRemoteDataSource(private val api: IApi): IUserDataSource {
 
     override suspend fun loginAsync(request: LoginRequest): Deferred<LoginResponse> = api.loginAsync(request)
 

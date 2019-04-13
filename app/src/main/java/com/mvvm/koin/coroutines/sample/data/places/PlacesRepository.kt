@@ -1,18 +1,11 @@
 package com.mvvm.koin.coroutines.sample.data.places
 
 import androidx.annotation.VisibleForTesting
-import com.mvvm.koin.coroutines.sample.data.BaseRepositoryModule
 import com.mvvm.koin.coroutines.sample.data.room.Place
 import kotlinx.coroutines.Deferred
-import javax.inject.Inject
-import javax.inject.Named
-import javax.inject.Singleton
 
-@Singleton
-class PlacesRepository
-@Inject
-constructor(@Named(BaseRepositoryModule.LOCAL) private val localDataSource: IPlacesDataSource,
-            @Named(BaseRepositoryModule.REMOTE) private val remoteDataSource: IPlacesDataSource) : IPlacesDataSource {
+class PlacesRepository(private val localDataSource: PlacesLocalDataSource,
+                       private val remoteDataSource: PlacesRemoteDataSource) : IPlacesDataSource {
 
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     var hasCache = false

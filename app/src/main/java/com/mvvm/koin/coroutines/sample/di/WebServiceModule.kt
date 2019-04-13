@@ -4,31 +4,33 @@ import com.jakewharton.retrofit2.adapter.kotlin.coroutines.CoroutineCallAdapterF
 import com.mvvm.koin.coroutines.sample.BuildConfig
 import com.mvvm.koin.coroutines.sample.data.preference.PreferenceManager
 import com.mvvm.koin.coroutines.sample.webservice.IApi
-import dagger.Module
-import dagger.Provides
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
+import org.koin.dsl.module
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
-import javax.inject.Singleton
 
-@Module
-class WebServiceModule {
+object WebServiceModule {
+
+    val module = module {
+
+        // Retrofit
+        single { provideOkHttpClient(get()) }
+        single { provideRetrofit(get()) }
+        single { provideApi(get()) }
+    }
+
 
     enum class AuthenticationType {
         BASIC, OAUTH, NONE
     }
 
-    companion object {
-        private const val CONNECT_TIMEOUT = 60L
-        private const val READ_TIMEOUT = 60L
-        private const val WRITE_TIMEOUT = 60L
-    }
+    private const val CONNECT_TIMEOUT = 60L
+    private const val READ_TIMEOUT = 60L
+    private const val WRITE_TIMEOUT = 60L
 
-    @Singleton
-    @Provides
-    fun provideOkHttpClient(preferenceManager: PreferenceManager): OkHttpClient =
+    private fun provideOkHttpClient(preferenceManager: PreferenceManager): OkHttpClient =
             OkHttpClient.Builder().connectTimeout(CONNECT_TIMEOUT, TimeUnit.SECONDS)
                     .readTimeout(READ_TIMEOUT, TimeUnit.SECONDS)
                     .writeTimeout(WRITE_TIMEOUT, TimeUnit.SECONDS)
@@ -44,23 +46,17 @@ class WebServiceModule {
                     .addInterceptor(HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY)).build()
 
 
-    @Singleton
-    @Provides
-    fun provideRetrofit(okHttpClient: OkHttpClient): Retrofit =
+    private fun provideRetrofit(okHttpClient: OkHttpClient): Retrofit =
             Retrofit.Builder()
                     .baseUrl(BuildConfig.SERVER_URL)
                     .addConverterFactory(GsonConverterFactory.create())
                     .addCallAdapterFactory(CoroutineCallAdapterFactory())
                     .client(okHttpClient).build()
 
-    @Singleton
-    @Provides
-    fun provideApi(retrofit: Retrofit): IApi = retrofit.create(IApi::class.java)
+    private fun provideApi(retrofit: Retrofit): IApi = retrofit.create(IApi::class.java)
 
     private fun getHeaders(authType: AuthenticationType, preferenceManager: PreferenceManager): Map<String, String> {
-        val requestHeader = hashMapOf(
-                "version" to BuildConfig.VERSION_NAME
-        )
+        val requestHeader = hashMapOf("version" to BuildConfig.VERSION_NAME)
         val accessToken = preferenceManager.findPreference(PreferenceManager.ACCESS_TOKEN, "")
         when (authType) {
             AuthenticationType.BASIC -> {

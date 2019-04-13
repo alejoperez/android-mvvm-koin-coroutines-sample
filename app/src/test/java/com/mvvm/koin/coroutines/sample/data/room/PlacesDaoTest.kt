@@ -1,31 +1,11 @@
 package com.mvvm.koin.coroutines.sample.data.room
 
-import androidx.room.Room
-import androidx.test.platform.app.InstrumentationRegistry
-import com.mvvm.koin.coroutines.sample.base.BaseTest
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import org.junit.After
 import org.junit.Assert
-import org.junit.Before
 import org.junit.Test
 
 @ExperimentalCoroutinesApi
-class PlacesDaoTest : BaseTest() {
-
-    private lateinit var dataBase: SampleDataBase
-
-    @Before
-    fun initDb() {
-        dataBase = Room
-                .inMemoryDatabaseBuilder(InstrumentationRegistry.getInstrumentation().context, SampleDataBase::class.java)
-                .allowMainThreadQueries()
-                .build()
-    }
-
-    @After
-    fun closeDb() {
-        dataBase.close()
-    }
+class PlacesDaoTest : BaseDaoTest() {
 
     @Test
     fun placesTest() {

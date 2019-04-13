@@ -8,10 +8,12 @@ import com.mvvm.koin.coroutines.sample.webservice.LoginResponse
 import com.mvvm.koin.coroutines.sample.webservice.RegisterRequest
 import com.mvvm.koin.coroutines.sample.webservice.RegisterResponse
 import com.nhaarman.mockitokotlin2.*
-import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
+import org.junit.Before
 import org.junit.Test
+import org.koin.test.inject
+import org.koin.test.mock.declareMock
 import org.mockito.ArgumentMatchers
 
 @Suppress("DeferredResultUnused")
@@ -23,100 +25,85 @@ class UserRepositoryTest : BaseTest() {
     private val responseLogin: LoginResponse = mock()
     private val requestRegister: RegisterRequest = mock()
     private val responseRegister: RegisterResponse = mock()
-    private val localDataSource = mock<UserLocalDataSource>()
-    private val remoteDataSource = mock<UserRemoteDataSource>()
-    private val preferenceManager: PreferenceManager = mock {
-        doNothing().whenever(it).putPreference(ArgumentMatchers.anyString(), eq(Any()))
-    }
 
+    private val localDataSource = declareMock<UserLocalDataSource>()
+    private val remoteDataSource = declareMock<UserRemoteDataSource>()
+    private val preferenceManager = declareMock<PreferenceManager>()
 
-    private fun resetInteractions() {
-        reset(localDataSource, remoteDataSource)
-    }
+    private val userRepository by inject<UserRepository>()
 
-    @Test
-    fun saveUserAsyncTest() = runBlocking {
-        val repository = UserRepository(localDataSource, remoteDataSource, preferenceManager)
-        repository.saveUserAsync(user)
-
-        verifyZeroInteractions(remoteDataSource)
-        verify(localDataSource, times(1)).saveUserAsync(user)
-        resetInteractions()
+    @Before
+    fun setUpMocks() {
+        doNothing().whenever(preferenceManager).putPreference(ArgumentMatchers.anyString(), eq(Any()))
     }
 
     @Test
-    fun getUserAsyncTest() = runBlocking {
-        val repository = UserRepository(localDataSource, remoteDataSource, preferenceManager)
+    fun saveUserAsyncTest() {
+        runBlocking {
+            userRepository.saveUserAsync(user)
 
-        repository.getUserAsync()
-
-        verifyZeroInteractions(remoteDataSource)
-
-        verify(localDataSource, times(1)).getUserAsync()
-
-        resetInteractions()
-
+            verifyZeroInteractions(remoteDataSource)
+            verify(localDataSource, times(1)).saveUserAsync(user)
+        }
     }
 
     @Test
-    fun loginAsyncTest() = runBlocking {
-        val repository = UserRepository(localDataSource, remoteDataSource, preferenceManager)
+    fun getUserAsyncTest() {
+        runBlocking {
+            userRepository.getUserAsync()
 
-        val result = CompletableDeferred(responseLogin)
-        whenever(remoteDataSource.loginAsync(requestLogin)).thenReturn(result)
+            verifyZeroInteractions(remoteDataSource)
 
-        repository.loginAsync(requestLogin)
+            verify(localDataSource, times(1)).getUserAsync()
 
-        verify(remoteDataSource, times(1)).loginAsync(requestLogin)
-
-        verify(localDataSource, times(1)).saveUserAsync(result.await().toUser())
-
-
-        resetInteractions()
-
+        }
     }
 
     @Test
-    fun registerAsyncTest() = runBlocking {
+    fun loginAsyncTest() {
+        runBlocking {
+            val result = responseLogin.toDeferred()
+            whenever(remoteDataSource.loginAsync(requestLogin)).thenReturn(result)
 
-        val result = CompletableDeferred(responseRegister)
-        whenever(remoteDataSource.registerAsync(requestRegister)).thenReturn(result)
+            userRepository.loginAsync(requestLogin)
 
-        val repository = UserRepository(localDataSource, remoteDataSource, preferenceManager)
+            verify(remoteDataSource, times(1)).loginAsync(requestLogin)
+            verify(localDataSource, times(1)).saveUserAsync(result.await().toUser())
 
-        repository.registerAsync(requestRegister)
+        }
+    }
 
-        verify(remoteDataSource, times(1)).registerAsync(requestRegister)
+    @Test
+    fun registerAsyncTest() {
+        runBlocking {
+            val result = responseRegister.toDeferred()
+            whenever(remoteDataSource.registerAsync(requestRegister)).thenReturn(result)
 
-        verify(localDataSource, times(1)).saveUserAsync(result.await().toUser())
+            userRepository.registerAsync(requestRegister)
 
-        resetInteractions()
+            verify(remoteDataSource, times(1)).registerAsync(requestRegister)
+
+            verify(localDataSource, times(1)).saveUserAsync(result.await().toUser())
+        }
     }
 
     @Test
     fun isLoggedInTest() {
-        val repository = UserRepository(localDataSource, remoteDataSource, preferenceManager)
-
-        repository.isLoggedIn()
+        userRepository.isLoggedIn()
 
         verifyZeroInteractions(remoteDataSource)
 
         verify(localDataSource, times(1)).isLoggedIn()
-
-        resetInteractions()
     }
 
     @Test
     fun logoutTest() {
-        val repository = UserRepository(localDataSource, remoteDataSource, preferenceManager)
-
-        repository.logout()
+        userRepository.logout()
 
         verifyZeroInteractions(remoteDataSource)
 
         verify(localDataSource, times(1)).logout()
 
-        resetInteractions()
     }
 
 }

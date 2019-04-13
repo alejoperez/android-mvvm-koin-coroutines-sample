@@ -11,9 +11,8 @@ import com.mvvm.koin.coroutines.sample.livedata.Event
 import com.mvvm.koin.coroutines.sample.utils.getEventError
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import javax.inject.Inject
 
-class PhotosViewModel @Inject constructor(private val photosRepository: PhotosRepository): BaseViewModel() {
+class PhotosViewModel(private val photosRepository: PhotosRepository): BaseViewModel() {
 
     val isLoading = ObservableBoolean(false)
 
@@ -21,12 +20,12 @@ class PhotosViewModel @Inject constructor(private val photosRepository: PhotosRe
 
     fun getPhotos() {
 
-        viewModelScope.launch(contextProvider.Main) {
+        viewModelScope.launch(contextProvider.getMainContext()) {
 
             try {
                 showProgress()
 
-                val response = withContext(contextProvider.IO) { photosRepository.getPhotosAsync().await() }
+                val response = withContext(contextProvider.getIoContext()) { photosRepository.getPhotosAsync().await() }
 
                 photos.value = Event.success(response)
 
