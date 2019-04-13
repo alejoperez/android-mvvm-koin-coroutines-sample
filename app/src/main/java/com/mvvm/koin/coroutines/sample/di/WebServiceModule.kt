@@ -30,6 +30,8 @@ object WebServiceModule {
     private const val READ_TIMEOUT = 60L
     private const val WRITE_TIMEOUT = 60L
 
+    private val level = if(BuildConfig.DEBUG) HttpLoggingInterceptor.Level.BODY else HttpLoggingInterceptor.Level.NONE
+
     private fun provideOkHttpClient(preferenceManager: PreferenceManager): OkHttpClient =
             OkHttpClient.Builder().connectTimeout(CONNECT_TIMEOUT, TimeUnit.SECONDS)
                     .readTimeout(READ_TIMEOUT, TimeUnit.SECONDS)
@@ -43,7 +45,7 @@ object WebServiceModule {
                         requestBuilder.method(original.method(), original.body())
                         chain.proceed(requestBuilder.build())
                     }
-                    .addInterceptor(HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY)).build()
+                    .addInterceptor(HttpLoggingInterceptor().setLevel(level)).build()
 
 
     private fun provideRetrofit(okHttpClient: OkHttpClient): Retrofit =
